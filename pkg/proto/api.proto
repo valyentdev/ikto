@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package ikto;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/valyentdev/ikto/pkg/proto";
+
+service AdminService {
+  rpc NodeInfo(google.protobuf.Empty) returns (NodeInfoResponse) {}
+}
+
+message NodeInfoResponse {
+  Peer self = 1;
+  repeated Peer peers = 4;
+}
+
+message Peer {
+  string name = 1;
+  string public_key = 2;
+  string advertise_addr = 3;
+  string private_addr = 4;
+  int32 wg_port = 5;
+}
