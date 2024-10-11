@@ -52,7 +52,10 @@ func NewAgentCommand() *cobra.Command {
 
 			ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
 
-			server.StartAdminServer(ctx, *ikto, socket)
+			err = server.StartAdminServer(ctx, *ikto, socket)
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},

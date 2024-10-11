@@ -95,7 +95,7 @@ func (m *WGDevice) InitConfig() error {
 }
 
 func (m *WGDevice) Remove() error {
-	link, err := netlink.LinkByName("wg-ravel")
+	link, err := netlink.LinkByName(m.name)
 	if err != nil {
 		switch err.(type) {
 		case netlink.LinkNotFoundError:

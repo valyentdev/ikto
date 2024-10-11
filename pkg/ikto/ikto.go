@@ -72,7 +72,7 @@ func NewIkto(c *Config) (*Ikto, error) {
 		WGPort:           c.WGPort,
 	}
 
-	wg, err := network.New(fmt.Sprintf("wg-%s", c.Name), c.WGPort, privateKey)
+	wg, err := network.New(fmt.Sprintf(c.WGDevName), c.WGPort, privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create wg service: %w", err)
 	}
