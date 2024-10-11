@@ -45,7 +45,11 @@ func NewInitCommand() *cobra.Command {
 	var subnetPrefix int
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize configuration for ikto",
+		Short: "Initialize configuration for ikto.",
+		Long: `Initialize configuration for ikto by generating a random private address 
+in your mesh subnet.You can specify the mesh subnet and the subnet prefix
+length. Feel free to choose your private address in your mesh subnet.
+		`,
 		Run: func(cmd *cobra.Command, args []string) {
 			config := DefaultConfig()
 			_, ipNet, err := net.ParseCIDR(meshIpNet)

@@ -17,7 +17,7 @@ func NewAgentCommand() *cobra.Command {
 	var socket string
 	cmd := &cobra.Command{
 		Use:   "agent",
-		Short: "Start the agent",
+		Short: "Start the ikto agent",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(configPath) == 0 {
 				return fmt.Errorf("config path is required")
