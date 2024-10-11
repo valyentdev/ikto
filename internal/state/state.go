@@ -86,7 +86,7 @@ func (w *SyncedState) init(entries <-chan jetstream.KeyValueEntry) {
 			continue
 		}
 
-		w.peers[peer.PrivateCIDR] = peer
+		w.peers[entry.Key()] = peer
 	}
 }
 
