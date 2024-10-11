@@ -52,7 +52,7 @@ func printPeer(peer *proto.Peer) {
 	fmt.Printf("Name: %s\n", peer.Name)
 	fmt.Printf("Public Key: %s\n", peer.PublicKey)
 	fmt.Printf("Advertise Address: %s\n", peer.AdvertiseAddr)
-	fmt.Printf("Private CIDR: %s\n", peer.PrivateAddr)
+	fmt.Printf("Allowed IP: %s\n", peer.AllowedIp)
 	fmt.Printf("WireGuard Port: %d\n", peer.WgPort)
 	fmt.Println()
 }

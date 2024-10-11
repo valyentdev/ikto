@@ -11,12 +11,12 @@ type Peer struct {
 	Name             string    `json:"name"`
 	PublicKey        PublicKey `json:"public_key"`
 	AdvertiseAddress string    `json:"advertise_address"`
-	PrivateCIDR      string    `json:"private_cidr"`
+	AllowedIP        string    `json:"allowed_ip"`
 	WGPort           int       `json:"wg_port"`
 }
 
 func (p *Peer) WGPeerConfig() (wgtypes.PeerConfig, error) {
-	_, ipnet, err := net.ParseCIDR(p.PrivateCIDR)
+	_, ipnet, err := net.ParseCIDR(p.AllowedIP)
 	if err != nil {
 		return wgtypes.PeerConfig{}, err
 	}

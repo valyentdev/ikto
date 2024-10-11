@@ -13,6 +13,7 @@ import (
 
 type SyncedState struct {
 	stop   chan struct{}
+	finish chan struct{}
 	config Config
 	peers  map[string]types.Peer
 	mutex  sync.RWMutex
@@ -42,6 +43,7 @@ func New(config Config) *SyncedState {
 
 	return &SyncedState{
 		stop:   make(chan struct{}),
+		finish: make(chan struct{}),
 		peers:  make(map[string]types.Peer),
 		config: config,
 	}
@@ -55,11 +57,12 @@ func (w *SyncedState) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to watch: %w", err)
 	}
 
-	slog.Info("Initializing watcher", "subject", sub)
+	slog.Info("Started watching peers")
 	updates := watcher.Updates()
 	w.init(updates)
 
 	go func() {
+		slog.Info("Started continuous peer synchronization")
 		w.sync(updates)
 	}()
 
@@ -88,28 +91,37 @@ func (w *SyncedState) init(entries <-chan jetstream.KeyValueEntry) {
 
 		w.peers[entry.Key()] = peer
 	}
+	slog.Info("Initializing peers", "count", len(w.peers))
+	w.config.OnInitPeers(w.peers)
 }
 
 func (w *SyncedState) sync(entries <-chan jetstream.KeyValueEntry) {
-	for entry := range entries {
-		if entry == nil {
-			continue
-		}
+	for {
 
-		key := entry.Key()
-
-		switch entry.Operation() {
-		case jetstream.KeyValuePut:
-			peer, err := readPeer(entry.Value())
-			if err != nil {
-				slog.Error("failed to read peer", "error", err)
+		select {
+		case <-w.stop:
+			close(w.finish)
+			return
+		case entry := <-entries:
+			if entry == nil {
 				continue
 			}
-			w.onPeerPut(key, peer)
-		case jetstream.KeyValueDelete:
-			w.onPeerDelete(key)
-		case jetstream.KeyValuePurge:
-			w.onPeerDelete(key)
+
+			key := entry.Key()
+
+			switch entry.Operation() {
+			case jetstream.KeyValuePut:
+				peer, err := readPeer(entry.Value())
+				if err != nil {
+					slog.Error("failed to read peer", "error", err)
+					continue
+				}
+				w.onPeerPut(key, peer)
+			case jetstream.KeyValueDelete:
+				w.onPeerDelete(key)
+			case jetstream.KeyValuePurge:
+				w.onPeerDelete(key)
+			}
 		}
 	}
 }
@@ -118,6 +130,7 @@ func (w *SyncedState) onPeerPut(key string, peer types.Peer) {
 	if peer.PublicKey == w.config.IgnorePeer {
 		return
 	}
+	slog.Info("Peer put", "public_key", peer.PublicKey.String(), "ip", peer.AllowedIP)
 	w.mutex.Lock()
 	w.peers[key] = peer
 	w.mutex.Unlock()
@@ -134,12 +147,14 @@ func (w *SyncedState) onPeerDelete(key string) {
 		return
 	}
 
+	slog.Info("Peer delete", "public_key", peer.PublicKey.String(), "ip", peer.AllowedIP)
 	delete(w.peers, key)
 	w.config.OnPeerDelete(peer)
 }
 
 func (w *SyncedState) Stop() {
 	close(w.stop)
+	<-w.finish
 }
 
 func (s *SyncedState) ListPeers() []types.Peer {

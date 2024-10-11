@@ -137,8 +137,8 @@ func (m *WGDevice) configurePeers(peers []types.Peer, replacePeers bool) error {
 	for _, member := range peers {
 		peerConfig, err := member.WGPeerConfig()
 		if err != nil {
-			slog.Error("failed to get peer config", "error", err)
-			return err
+			slog.Error("failed to get peer config", "error", err, "peer_name", member.Name, "public_key", member.PublicKey.String(), "advertise_address", member.AdvertiseAddress, "allowed_ip", member.AllowedIP, "wg_port", member.WGPort)
+			continue
 		}
 
 		peerConfigs = append(peerConfigs, peerConfig)

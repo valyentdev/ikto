@@ -68,9 +68,11 @@ func NewIkto(c *Config) (*Ikto, error) {
 		Name:             c.Name,
 		PublicKey:        types.PublicKey(publicKey),
 		AdvertiseAddress: c.AdvertiseAddress.String(),
-		PrivateCIDR:      c.getPrivateCIDR(),
+		AllowedIP:        c.getPrivateCIDR(),
 		WGPort:           c.WGPort,
 	}
+
+	slog.Info("Starting with self config", "name", self.Name, "public_key", self.PublicKey.String(), "advertise_address", self.AdvertiseAddress, "allowed_ip", self.AllowedIP, "wg_port", self.WGPort, "wg_dev_name", c.WGDevName)
 
 	wg, err := network.New(fmt.Sprintf(c.WGDevName), c.WGPort, privateKey)
 	if err != nil {
@@ -87,9 +89,11 @@ func NewIkto(c *Config) (*Ikto, error) {
 		return nil, fmt.Errorf("failed to init wireguard config: %w", err)
 	}
 
+	meshOnes, _ := c.MeshIPNet.Mask.Size()
+
 	err = wg.SetAddr(net.IPNet{
 		IP:   c.PrivateAddress,
-		Mask: net.CIDRMask(c.HostPrefixLength, len(c.PrivateAddress)*8),
+		Mask: net.CIDRMask(meshOnes, len(c.PrivateAddress)*8),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to set address: %w", err)
@@ -154,7 +158,7 @@ func NewIkto(c *Config) (*Ikto, error) {
 }
 
 func (i *Ikto) init() error {
-	previous, revision, err := i.store.GetPeer(context.Background(), i.self.PrivateCIDR)
+	previous, revision, err := i.store.GetPeer(context.Background(), i.self.AllowedIP)
 	if err != nil && err != jetstream.ErrKeyNotFound {
 		return fmt.Errorf("failed to get self: % w", err)
 	}
@@ -192,6 +196,7 @@ func (i *Ikto) Start() error {
 }
 
 func (i *Ikto) Stop() {
+	slog.Info("stopping")
 	i.state.Stop()
 	i.nc.Close()
 }

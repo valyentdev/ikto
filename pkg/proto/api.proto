@@ -19,6 +19,7 @@ message Peer {
   string name = 1;
   string public_key = 2;
   string advertise_addr = 3;
-  string private_addr = 4;
+  //  string private_addr = 4;
   int32 wg_port = 5;
+  string allowed_ip = 6;
 }

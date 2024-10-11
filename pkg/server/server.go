@@ -52,7 +52,7 @@ func (s *server) NodeInfo(context.Context, *emptypb.Empty) (*proto.NodeInfoRespo
 			Name:          peer.Name,
 			PublicKey:     peer.PublicKey.String(),
 			AdvertiseAddr: peer.AdvertiseAddress,
-			PrivateAddr:   peer.PrivateCIDR,
+			AllowedIp:     peer.AllowedIP,
 			WgPort:        int32(peer.WGPort),
 		})
 	}
@@ -62,7 +62,7 @@ func (s *server) NodeInfo(context.Context, *emptypb.Empty) (*proto.NodeInfoRespo
 			Name:          self.Name,
 			PublicKey:     self.PublicKey.String(),
 			AdvertiseAddr: self.AdvertiseAddress,
-			PrivateAddr:   self.PrivateCIDR,
+			AllowedIp:     self.AllowedIP,
 			WgPort:        int32(self.WGPort),
 		},
 		Peers: peersProto,

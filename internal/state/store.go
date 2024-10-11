@@ -25,7 +25,7 @@ func (s *Store) CreatePeer(ctx context.Context, peer types.Peer) (uint64, error)
 		return 0, err
 	}
 
-	revision, err := s.kv.Create(ctx, getKey(peer.PrivateCIDR), bytes)
+	revision, err := s.kv.Create(ctx, getKey(peer.AllowedIP), bytes)
 	if err != nil {
 		return 0, err
 	}
@@ -57,7 +57,7 @@ func (s *Store) UpdatePeer(ctx context.Context, peer types.Peer, revision uint64
 		return 0, err
 	}
 
-	r, err := s.kv.Update(ctx, getKey(peer.PrivateCIDR), bytes, revision)
+	r, err := s.kv.Update(ctx, getKey(peer.AllowedIP), bytes, revision)
 	if err != nil {
 		return 0, err
 	}

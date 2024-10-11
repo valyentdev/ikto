@@ -48,14 +48,14 @@ func NewAgentCommand() *cobra.Command {
 				return err
 			}
 
-			defer ikto.Stop()
-
 			ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
 
 			err = server.StartAdminServer(ctx, *ikto, socket)
 			if err != nil {
 				return err
 			}
+
+			ikto.Stop()
 
 			return nil
 		},
