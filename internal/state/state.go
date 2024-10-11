@@ -42,6 +42,7 @@ func New(config Config) *SyncedState {
 
 	return &SyncedState{
 		stop:   make(chan struct{}),
+		peers:  make(map[string]types.Peer),
 		config: config,
 	}
 }
